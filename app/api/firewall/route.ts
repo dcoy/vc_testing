@@ -44,7 +44,7 @@ export async function PATCH() {
     },
   });
  
-  let res = await fetch(`${baseUrl}?projectId=${projectId}&teamId=${teamId}`, {
+  const res = await fetch(`${baseUrl}?projectId=${projectId}&teamId=${teamId}`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${process.env.VERCEL_TOKEN}`,
