@@ -1,22 +1,29 @@
-export async function PATCH() {
-  console.log('api firewall route.js is running ========>')
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  console.log('api firewall route.ts is running ========>');
+
+  // Check if we're in production
+  if (process.env.VERCEL_ENV !== 'production') {
+    return NextResponse.json({ status: 'Skipped: Not in production' }, { status: 200 });
+  }
+
   const baseUrl = 'https://api.vercel.com/v1/security/firewall/config';
- 
+
   const body = JSON.stringify({
     action: 'rules.insert',
     id: null,
     value: {
-      active:
-        true /** Whether this rule is enabled or not in your Vercel WAF configuration */,
+      active: true,
       name: 'Deny non-browser traffic or blacklisted ASN',
       description: 'Deny traffic without Mozilla or from a specific ASN',
-      conditionGroup: [ /** Any of the conditions in this array can be true */
+      conditionGroup: [
         {
           conditions: [
             {
-              neg: true, /** Perform negative match */
-              op: "re", /** Operator used to compare - re equivalent to "Match regex expression" */
-              type: 'user_agent' /** Parameter from incoming traffic */,
+              neg: true,
+              op: "re",
+              type: 'user_agent',
               value: '.*Mozilla.*',
             },
           ],
@@ -24,9 +31,9 @@ export async function PATCH() {
         {
           conditions: [
             {
-              op: 'inc' /** Operator used to compare - inc equivalent to "Includes"*/,
-              type: 'geo_as_number' /** Parameter from incoming traffic */,
-              value: ["124", "456", "789"], /** includes any of the number combinations in the array */
+              op: 'inc',
+              type: 'geo_as_number',
+              value: ["124", "456", "789"],
             },
           ],
         },
@@ -41,22 +48,33 @@ export async function PATCH() {
       },
     },
   });
- 
-  const res = await fetch(`${baseUrl}?projectId=${process.env.VERCEL_PROJECT_ID}&teamId=${process.env.VERCEL_TEAM_ID}`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${process.env.VERCEL_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body,
-  });
- 
-  if (!res.ok) {
-    return Response.json(
-      { status: 'Failed to update Firewall' },
-      { status: res.status },
+
+  try {
+    const res = await fetch(`${baseUrl}?projectId=${process.env.VERCEL_PROJECT_ID}&teamId=${process.env.VERCEL_TEAM_ID}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${process.env.VERCEL_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('Failed to update Firewall:', errorData);
+      return NextResponse.json(
+        { status: 'Failed to update Firewall', error: errorData },
+        { status: res.status }
+      );
+    }
+
+    return NextResponse.json({ status: 'New rule added to Firewall' });
+  } catch (error) {
+    console.error('Error updating Firewall:', error);
+    return NextResponse.json(
+      { status: 'Error updating Firewall', error: String(error) },
+      { status: 500 }
     );
   }
- 
-  return Response.json({ status: 'New rule added to Firewall' });
 }
+
