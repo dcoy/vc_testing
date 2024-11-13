@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function PATCH(request: NextRequest): Promise<NextResponse> {
+export async function PATCH(): Promise<NextResponse> {
   console.log('api firewall route.ts is running ========>');
 
   // Check if we're in production
