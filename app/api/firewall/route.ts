@@ -1,8 +1,6 @@
 export async function PATCH() {
   console.log('api firewall route.js is running ========>')
   const baseUrl = 'https://api.vercel.com/v1/security/firewall/config';
-  const teamId = 'team_k5DEcXzEWcs7ym4F8uN8wL33';
-  const projectId = 'prj_xAJdwForDqu79G9URolTvDbVYrej';
  
   const body = JSON.stringify({
     action: 'rules.insert',
@@ -44,7 +42,7 @@ export async function PATCH() {
     },
   });
  
-  const res = await fetch(`${baseUrl}?projectId=${projectId}&teamId=${teamId}`, {
+  const res = await fetch(`${baseUrl}?projectId=${process.env.VERCEL_PROJECT_ID}&teamId=${process.env.VERCEL_TEAM_ID}`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${process.env.VERCEL_TOKEN}`,
