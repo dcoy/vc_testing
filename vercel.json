@@ -1,13 +1,11 @@
 {
 	"version": 2,
-	"functions": [
-		{
-			"app/api/firewall/*": {
-				"memory": 512
-			},
-			"src/pages/api/firewall/*": {
-				"memory": 512
-			}
+	"functions": {
+		"app/api/firewall/*": {
+			"memory": 512
+		},
+		"src/pages/api/firewall/*": {
+			"memory": 512
 		}
-	]
+	}
 }
