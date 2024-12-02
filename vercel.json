@@ -1,6 +1,6 @@
 {
 	"version": 2,
-	"buildCommand": "next build --debug",
+	"buildCommand": "vercel build --debug",
 	"functions": {
 		"app/api/firewall/*": {
 			"memory": 512
