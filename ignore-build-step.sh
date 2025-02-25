@@ -6,7 +6,7 @@ echo "VERCEL_GIT_COMMIT_SHA: $VERCEL_GIT_COMMIT_SHA"
 
 # Function to determine if it's a production Deploy Hook build
 is_deploy_hook_build() {
-    [[ -z "$VERCEL_ENV" == "preview" ]]
+    [[ -z "$VERCEL_ENV" == "production" ]]
 }
 
 # Check if it's a production Deploy Hook build
