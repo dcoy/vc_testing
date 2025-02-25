@@ -4,25 +4,18 @@ echo "VERCEL_ENV: $VERCEL_ENV"
 echo "VERCEL_GIT_COMMIT_REF: $VERCEL_GIT_COMMIT_REF"
 echo "VERCEL_GIT_COMMIT_SHA: $VERCEL_GIT_COMMIT_SHA"
 
-# Function to determine if it's a Deploy Hook build
+# Function to determine if it's a production Deploy Hook build
 is_deploy_hook_build() {
-    [[ -z "$VERCEL_GIT_COMMIT_SHA" && "$VERCEL_GIT_COMMIT_REF" == "main" ]]
+    [[ -z "$VERCEL_ENV" == "preview" ]]
 }
 
-# Check if it's a Deploy Hook build
+# Check if it's a production Deploy Hook build
 if is_deploy_hook_build; then
-    echo "This is a Deploy Hook build"
-    # Allow Deploy Hook builds only for preview environment
-    if [[ "$VERCEL_ENV" == "preview" ]]; then
-        echo "✅ - Deploy Hook build allowed for preview environment"
-        exit 1
-    else
-        echo "🛑 - Deploy Hook build not allowed for $VERCEL_ENV environment"
-        exit 0
-    fi
+    echo "This is a production Deploy Hook build"
+    echo "🛑 - Deploy Hook build not allowed for production environment"
+    exit 0
 else
-    echo "This is a Git push build"
-    # Always allow Git push builds
-    echo "✅ - Git push build allowed for $VERCEL_ENV environment"
+    # This could be a preview Deploy Hook build or any Git push build
+    echo "✅ - Build allowed for $VERCEL_ENV environment"
     exit 1
 fi
