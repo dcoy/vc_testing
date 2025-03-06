@@ -1,23 +1,35 @@
 #!/bin/bash
 
-echo "VERCEL_ENV: $VERCEL_ENV"
-echo "VERCEL_GIT_COMMIT_REF: $VERCEL_GIT_COMMIT_REF"
-echo "VERCEL_GIT_COMMIT_SHA: $VERCEL_GIT_COMMIT_SHA"
-echo "VERCEL_TARGET_ENV: $VERCEL_TARGET_ENV"
-echo "ALLOW_DEPLOY_HOOK: $ALLOW_DEPLOY_HOOK"
+# Get the current branch name
+CURRENT_BRANCH=${VERCEL_GIT_COMMIT_REF:-main}
 
-# Function to determine if it's a production Deploy Hook build
-is_deploy_hook_build() {
-    [[ -z "$VERCEL_TARGET_ENV" || "$VERCEL_TARGET_ENV" == "production" && "$ALLOW_DEPLOY_HOOK" == "false" ]]
-}
+# Get the parent branch (this is a simplified approach)
+PARENT_BRANCH=$(git show-branch -a 2>/dev/null | grep '\*' | grep -v "$(git rev-parse --abbrev-ref HEAD)" | head -n1 | sed 's/.*\[$$.*$$\].*/\1/' | sed 's/[\^~].*//')
 
-# Check if it's a production Deploy Hook build
-if is_deploy_hook_build; then
-    echo "This is a production Deploy Hook build"
-    echo "🛑 - Deploy Hook build not allowed for production environment"
+# For vc-testing project
+if [[ "$VERCEL_PROJECT_NAME" == "vc-testing" ]]; then
+  # Only build if parent branch is legacy-docs
+  if [[ "$PARENT_BRANCH" == "legacy-docs" ]]; then
+    # Return 1 to continue the build
+    exit 1
+  else
+    # Return 0 to skip the build
+    echo "Skipping build for vc-testing as parent branch is not legacy-docs"
     exit 0
-else
-# This could be a preview Deploy Hook build or any Git push build
-  echo "✅ - Build allowed for $VERCEL_TARGET_ENV environment"
-  exit 1
+  fi
 fi
+
+# For docs project
+if [[ "$VERCEL_PROJECT_NAME" == "docs" ]]; then
+  # Skip build if parent branch is legacy-docs
+  if [[ "$PARENT_BRANCH" == "legacy-docs" ]]; then
+    echo "Skipping build for docs as parent branch is legacy-docs"
+    exit 0
+  else
+    # Return 1 to continue the build
+    exit 1
+  fi
+fi
+
+# For all other projects, continue the build
+exit 1
